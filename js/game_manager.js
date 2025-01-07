@@ -1,5 +1,6 @@
 function GameManager(size, InputManager, Actuator, StorageManager) {
   this.size           = size; // Size of the grid
+  this.isActionable     = true; // Whether inputs are being accepted
   this.inputManager   = new InputManager;
   this.storageManager = new StorageManager;
   this.actuator       = new Actuator;
@@ -56,6 +57,11 @@ GameManager.prototype.setup = function () {
 
   // Update the actuator
   this.actuate();
+
+  // Hack in an actionability switch
+  document.addEventListener("gameActionable", (e) => {
+    this.isActionable = e.detail;
+  })
 };
 
 // Set up the initial tiles to start the game with
@@ -132,6 +138,7 @@ GameManager.prototype.move = function (direction) {
   var self = this;
 
   if (this.isGameTerminated()) return; // Don't do anything if the game's over
+  if (!this.isActionable)      return; // Don't do anything if the game isn't actionable
 
   var cell, tile;
 
@@ -141,6 +148,9 @@ GameManager.prototype.move = function (direction) {
 
   // Save the current tile positions and remove merger information
   this.prepareTiles();
+
+  // Hack in a custom event
+  var emitData = [];
 
   // Traverse the grid in the right direction and move tiles
   traversals.x.forEach(function (x) {
@@ -165,6 +175,7 @@ GameManager.prototype.move = function (direction) {
 
           // Update the score
           self.score += merged.value;
+          emitData.push(merged.value);
 
           // The mighty 2048 tile
           if (merged.value === 2048) self.won = true;
@@ -180,6 +191,12 @@ GameManager.prototype.move = function (direction) {
   });
 
   if (moved) {
+    if (emitData.length > 0) {
+      document.dispatchEvent(new CustomEvent("merge", {
+        detail: emitData
+      }))
+    }
+
     this.addRandomTile();
 
     if (!this.movesAvailable()) {
