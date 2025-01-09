@@ -20,18 +20,33 @@ popupWindow.style.cssText = `
 `;
 document.body.appendChild(popupWindow)
 
+async function preloadVideo(src) {
+    const res = await fetch(src);
+    const blob = await res.blob();
+    return URL.createObjectURL(blob);
+}
+
 function initializeAd(ad_data) {
-    popupVideo = document.createElement("video")
+    const popupVideo = document.createElement("video")
     popupVideo.style.cssText = `
         max-height: 100%;
         max-width: 100%;
-    `
-    popupVideo.innerHTML = `
-        <source src="./media/${ad_data}.mov">
-    `
+    `;
 
-    return popupVideo
+    const returnObject = { name: ad_data, data: popupVideo, initalized: false }
+
+    preloadVideo(`./media/${ad_data}.mov`).then((v) => { 
+        popupVideo.src = v
+        console.log(ad_data)
+        returnObject.initalized = true
+    })  
+
+    return returnObject
 }
+
+const AD_STACK = AD_QUEUE.reverse().map((name) => {
+    return initializeAd(name)
+})
 
 function resizeAdWindow() {
     console.log("Resize called")
@@ -41,9 +56,13 @@ function resizeAdWindow() {
 
 var isShowing = false
 
-function showAd(ad_data) {
+function tryShowAd() {
     // console.log(ad_data)
     if (isShowing) { return }
+    if (AD_STACK.length == 0) { return }
+    if (!AD_STACK[0].initalized) { return }
+    console.log(AD_STACK[0])
+    console.log(AD_STACK[1])
     isShowing = true
 
     // Disable game
@@ -61,7 +80,7 @@ function showAd(ad_data) {
         easing: "ease-out"
     })
 
-    const popupVideo = initializeAd(ad_data)
+    const popupVideo = AD_STACK.pop().data
     popupVideo.addEventListener("ended", () => { hideAd(popupVideo) })
     popupWindow.appendChild(popupVideo) 
     // TODO: progress bar
@@ -88,12 +107,10 @@ function hideAd(popupVideo) {
     isShowing = false
 }
 
-const AD_STACK = AD_QUEUE.reverse()
-
 document.addEventListener("merge", async (e) => {
     console.log(e.detail)
-    if (e.detail.includes(TRIGGER_ON_MERGE) && AD_STACK.length > 0) {
-        window.setTimeout(showAd, 1000, AD_STACK.pop())
+    if (e.detail.includes(TRIGGER_ON_MERGE)) {
+        window.setTimeout(tryShowAd, 1000)
     }
 })
 
