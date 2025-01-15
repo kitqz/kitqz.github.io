@@ -2,7 +2,6 @@
 const AD_QUEUE = ["banking", "cooking"]
 const TRIGGER_ON_MERGE = 128
 
-
 const body = document.body
 const html = document.documentElement;
 
