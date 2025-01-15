@@ -17,6 +17,7 @@ popupWindow.style.cssText = `
     display: flex;
     align-items: center;
     justify-content: center;
+    pointer-events: none;
 `;
 document.body.appendChild(popupWindow)
 
