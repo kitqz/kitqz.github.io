@@ -33,6 +33,7 @@ function initializeAd(ad_data) {
         max-height: 100%;
         max-width: 100%;
     `;
+    popupVideo.playsInline = true;
 
     const returnObject = { name: ad_data, data: popupVideo, initalized: false }
 
