@@ -61,8 +61,8 @@ function tryShowAd() {
     if (isShowing) { return }
     if (AD_STACK.length == 0) { return }
     if (!AD_STACK[0].initalized) { return }
-    console.log(AD_STACK[0])
-    console.log(AD_STACK[1])
+    // console.log(AD_STACK[0])
+    // console.log(AD_STACK[1])
     isShowing = true
 
     // Disable game
