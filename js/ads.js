@@ -1,5 +1,5 @@
 
-const AD_QUEUE = ["banking", "cooking"]
+const AD_QUEUE = ["monsters", "cooking"]
 const TRIGGER_ON_MERGE = 128
 
 const body = document.body
